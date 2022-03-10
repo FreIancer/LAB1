@@ -1,10 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/**
- *
- */
-
 typedef struct Node* Polynomial;//多项式
 struct Node {
     int coef;//系数
@@ -23,16 +19,16 @@ void Attach(int c, int e, Polynomial* pRear) {
     *pRear = P;   // pRear指针移动到P结点
 }
 
-/*int Compare(int a, int b) {
-    // a,b比大小
+int Compare(int a,int b){
+    // 比大小
     int c;
-    if (a > b) c = 1;
-    else if (a < b) c = -1;
-    else c = 0;
+    if (a>b) c=1;
+    else if (a<b) c=-1;
+    else c=0;
     return c;
-}*/                     //这段有弔用？？？？？
+}
 
-Polynomial ReadPoly() {
+Polynomial Read() {
     // 读取规格化输入的内容，整理为链表
     Polynomial P, Rear, t;
     int c, e, N;
@@ -49,6 +45,82 @@ Polynomial ReadPoly() {
     return P;
 }
 
+Polynomial Add(Polynomial P1,Polynomial P2){
+    Polynomial front,rear,temp;
+    int sum;
+    rear=(Polynomial)malloc(sizeof(struct Node));
+    front=rear;//front 用来记录链表头结点
+    while(P1&&P2){
+
+        switch(Compare(P1->expon,P2->expon)){
+            // 比较1 2 的指数
+            case 1:
+                Attach(P1->coef,P1->expon,&rear);
+                P1=P1->next;
+                break;
+            case -1:
+                Attach(P2->coef,P2->expon,&rear);
+                P2=P2->next;
+                break;
+            case 0:
+                // 相同加系数
+                sum=P1->coef+P2->coef;
+                if (sum){
+                    Attach(sum,P1->expon,&rear);
+                }
+                P1=P1->next;
+                P2=P2->next;
+                break;
+
+        }
+    }
+    for(;P1;P1=P1->next) Attach(P1->coef,P1->expon,&rear);
+    for(;P2;P2=P2->next) Attach(P2->coef,P2->expon,&rear);
+    rear->next=NULL;
+    temp=front;
+    front=front->next;
+    free(temp);
+    return front;
+}
+
+Polynomial Div(Polynomial P1,Polynomial P2){
+    Polynomial front,rear,temp;
+    int sum;
+    rear=(Polynomial)malloc(sizeof(struct Node));
+    front=rear;//front 用来记录链表头结点
+    while(P1&&P2){
+
+        switch(Compare(P1->expon,P2->expon)){
+            // 比较1 2 的指数
+            case 1:
+                Attach(P1->coef,P1->expon,&rear);
+                P1=P1->next;
+                break;
+            case -1:
+                Attach(P2->coef,P2->expon,&rear);
+                P2=P2->next;
+                break;
+            case 0:
+                // 相同加系数
+                sum=P1->coef-P2->coef;
+                if (sum){
+                    Attach(sum,P1->expon,&rear);
+                }
+                P1=P1->next;
+                P2=P2->next;
+                break;
+
+        }
+    }
+    for(;P1;P1=P1->next) Attach(P1->coef,P1->expon,&rear);
+    for(;P2;P2=P2->next) Attach(P2->coef,P2->expon,&rear);
+    rear->next=NULL;
+    temp=front;
+    front=front->next;
+    free(temp);
+    return front;
+}
+
 Polynomial Mult(Polynomial P1, Polynomial P2)
 {
     // 多项式相乘
@@ -57,7 +129,8 @@ Polynomial Mult(Polynomial P1, Polynomial P2)
     if (!P1 || !P2)
         return NULL;// 判断如果有一个为空，则返回空;
 
-    t1 = P1; t2 = P2;
+    t1 = P1;
+    t2 = P2;
     P = (Polynomial)malloc(sizeof(struct Node));
     P->next = NULL;
     Rear = P;//P始终指向结果多项式开头，rear指向尾部
@@ -117,14 +190,14 @@ void PrintPoly(Polynomial P) {
     int flag = 0;
 
     if (!P) {
-        printf("0 0\n");
+        printf("0\n");
         return;
     }
 
     while (P) {
         if (!flag) flag = 1;
         else printf(" ");
-        printf("%d %d", P->coef, P->expon);
+        printf("(%d) x^%d +", P->coef, P->expon);
         P = P->next;
     }
     printf("\n");
@@ -132,9 +205,13 @@ void PrintPoly(Polynomial P) {
 
 int main()
 {
-    Polynomial P1, P2, PP;
-    P1 = ReadPoly();
-    P2 = ReadPoly();
+    Polynomial P1, P2, PP, PS, PD;
+    P1 = Read();
+    P2 = Read();
+    PS=Add(P1,P2);
+    PrintPoly(PS);
+    PD= Div(P1,P2);
+    PrintPoly(PD);
     PP = Mult(P1, P2);
     PrintPoly(PP);
 
